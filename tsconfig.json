@@ -1,0 +1,60 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "rootDir": "./",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    "paths": {
+      "@@services": [
+        "src/core/services/index.ts"
+      ],
+      "@@controllers": [
+        "src/core/controllers/index.ts"
+      ],
+      "@@routes": [
+        "src/core/routes/index.ts"
+      ],
+      "@@utils": [
+        "src/core/utils/index.ts"
+      ],
+      "@@types": [
+        "src/core/types/index.ts"
+      ],
+      "@@interfaces": [
+        "src/core/interfaces/index.ts"
+      ],
+      "@@models": [
+        "src/core/models/index.ts"
+      ],
+      "@@validators": [
+        "src/core/validators/index.ts"
+      ],
+      "@@functions": [
+        "src/core/utils/functions.ts"
+      ],
+      "@@customValidators": [
+        "src/core/utils/customValidators.ts"
+      ],
+      "@@constants": [
+        "src/core/utils/constants.ts"
+      ],
+      "@@dataConstants": [
+        "src/core/utils/dataConstants.ts"
+      ],
+      "@@errors": [
+        "src/core/errors/index.ts"
+      ],
+      "@@middlewares": [
+        "src/core/middlewares/index.ts"
+      ],
+      "@@helpers": [
+        "src/core/helpers/index.ts"
+      ],
+    }
+  }
+}
