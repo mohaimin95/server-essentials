@@ -32,6 +32,10 @@ userRouter.patch(
   validateRequest(resetPasswordValidator),
   handleRoute(UserController.verfiyCodeAndResetPassword),
 );
+userRouter.get(
+  '/refresh',
+  handleRoute(UserController.refreshAccessToken),
+);
 
 userRouter.use(authMiddleware());
 userRouter.get('/logout', handleRoute(UserController.logout));

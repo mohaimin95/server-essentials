@@ -2,7 +2,7 @@
 
 import { Admin } from '@@models';
 
-export class AdminHelper {
+export default class AdminHelper {
   public static async getAdminById(id: String, select = '-password') {
     return Admin.findById(id).select(select);
   }

@@ -21,13 +21,13 @@ const sniffAuthToken = async (req: Request) => {
           isAdmin: true,
           userType: userTypes.ADMIN,
         };
-        // eslint-disable-next-line no-empty
+        // eslint-disable-next-line no-empty, @typescript-eslint/no-unused-vars
       } catch (ex) {}
       if (!append?.isAdmin) {
         try {
           const decoded = await JWTService.verifyToken(token);
           append = { user: decoded, userType: userTypes.USER };
-          // eslint-disable-next-line no-empty
+          // eslint-disable-next-line no-empty, @typescript-eslint/no-unused-vars
         } catch (ex) {}
       }
     }

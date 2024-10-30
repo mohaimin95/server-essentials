@@ -7,6 +7,7 @@ export const DbCollections = {
   TEMPLATE_PREVIEW_TYPE: 'TemplatePreviewType',
   PROJECT: 'Project',
   ROLE: 'Role',
+  USER_SESSION: 'UserSession',
 };
 
 export const userTypes = {

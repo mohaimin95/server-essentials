@@ -5,7 +5,7 @@ import { normalizeString } from '@@functions';
 import { IUser } from '@@interfaces';
 import { User } from '@@models';
 
-export class UserHelper {
+export default class UserHelper {
   public static async getUserByEmail(email: string) {
     return User.findOne({ email }).select('-password'); // Exclude password for security
   }

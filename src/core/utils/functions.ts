@@ -144,7 +144,7 @@ export const calculateExpiry = (expiry: string): Date => {
 
 export const getCookieParamForTokens = (tokens: {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 }) => {
   const cookies = [];
   if (tokens.accessToken) {
@@ -179,3 +179,18 @@ export const getCookieParamForTokens = (tokens: {
 
 export const normalizeString = (str: string) =>
   str?.toLowerCase().trim();
+
+export const generateShortHex = (): string => {
+  // Get the current time in milliseconds as a hex value
+  const timeHex = Date.now().toString(16);
+
+  // Generate a random 4-byte hex string
+  const randomHex = Math.floor(Math.random() * 0xffffffff)
+    .toString(16)
+    .padStart(8, '0');
+
+  // Combine time-based and random hex values, and shorten
+  const shortHex = (timeHex + randomHex).slice(0, 12); // Limit to 12 characters
+
+  return shortHex;
+};

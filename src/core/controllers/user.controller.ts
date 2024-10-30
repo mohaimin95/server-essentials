@@ -72,6 +72,25 @@ export default class UserController {
     };
   };
 
+  static refreshAccessToken: Controller = async (
+    req: IAuthRequest,
+  ) => {
+    const accessToken = await UserService.refreshAccessToken(
+      req.signedCookies.refreshToken?.split('Bearer ')[1],
+      req.isAdmin as boolean,
+    );
+    const cookies = getCookieParamForTokens({
+      accessToken,
+    }) as CookieParam[];
+
+    return {
+      response: {
+        message: 'Access token is refreshed.',
+      },
+      cookies,
+    };
+  };
+
   static logout: Controller = async (
     _req: IAuthRequest,
     res: Response,

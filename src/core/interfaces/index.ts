@@ -11,8 +11,9 @@ import IAdminSignup from './adminSignUp.interface';
 import IRouteHandlerOptions from './routeHandlerOptions.interface';
 import IPatchIsActiveRequest from './patchIsActiveRequest';
 import IRole from './role.interface';
-import { IResetPasswordRequest } from './resetPasswordRequest.interface';
-import { IResetPassword } from './resetPassword.interface';
+import IResetPasswordRequest from './resetPasswordRequest.interface';
+import IResetPassword from './resetPassword.interface';
+import IUserSession from './userSession.interface';
 
 export {
   IController,
@@ -30,4 +31,5 @@ export {
   IRole,
   IResetPassword,
   IResetPasswordRequest,
+  IUserSession,
 };

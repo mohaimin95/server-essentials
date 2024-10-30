@@ -1,3 +1,3 @@
-export interface IResetPasswordRequest {
+export default interface IResetPasswordRequest {
   email: string;
 }

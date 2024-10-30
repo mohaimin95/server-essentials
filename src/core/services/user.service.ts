@@ -11,6 +11,8 @@ import {
   ValidationError,
 } from '@@errors';
 import { PasswordHelper, TokenHelper, UserHelper } from '@@helpers';
+import { allowedUserTypes } from '@@constants';
+import { AllowedUserTypes } from '@@types';
 import AuthService from './auth.service';
 import BcryptService from './bcrypt.service';
 
@@ -103,5 +105,17 @@ export default class UserService {
     newPassword: string,
   ) {
     return PasswordHelper.resetPassword(email, code, newPassword);
+  }
+
+  static async refreshAccessToken(
+    refreshToken: string,
+    isAdmin: boolean,
+  ) {
+    const tokenHelper = new TokenHelper(
+      (isAdmin
+        ? allowedUserTypes.ADMIN
+        : allowedUserTypes.CUSTOMER) as AllowedUserTypes,
+    );
+    return tokenHelper.createAccessToken(refreshToken);
   }
 }

@@ -3,9 +3,9 @@ import { redisClient } from '@@utils';
 import { BcryptService } from '@@services';
 import { normalizeString } from '@@functions';
 import { NotFoundError, UnauthorizedError } from '@@errors';
-import { EmailHelper } from './email.helper';
+import EmailHelper from './email.helper';
 
-export class PasswordHelper {
+export default class PasswordHelper {
   private static generateOTP(): string {
     return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
   }

@@ -4,7 +4,7 @@ import {
   SentMessageInfo,
 } from 'nodemailer/lib/smtp-transport';
 
-export class EmailHelper {
+export default class EmailHelper {
   private transporter: Transporter;
 
   constructor() {

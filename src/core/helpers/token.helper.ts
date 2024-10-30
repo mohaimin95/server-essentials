@@ -3,8 +3,9 @@ import { AllowedUserTypes } from '@@types';
 import jwt from 'jsonwebtoken';
 import { NotFoundError, UnauthorizedError } from '@@errors';
 import { IAdmin, IUser } from '@@interfaces';
-import { UserHelper } from './user.helper';
-import { AdminHelper } from './admin.helper';
+import UserHelper from './user.helper';
+import AdminHelper from './admin.helper';
+import SessionHelper from './session.helper';
 
 interface TokenOptions {
   refreshTokenKey: string;
@@ -14,6 +15,7 @@ interface TokenOptions {
 }
 
 interface TokenPayload {
+  session: string;
   isAdmin: boolean;
   id: string;
   role?: string;
@@ -125,7 +127,10 @@ export default class TokenHelper {
     const user: any = await this.getActiveUserById(id);
     if (!user) throw new NotFoundError('User not found!');
 
+    const session = await SessionHelper.createSession(user._id);
+
     const payload: TokenPayload = {
+      session: session._id.toString(),
       isAdmin: this.userType === allowedUserTypes.ADMIN,
       id: (user as any)._id,
     };
@@ -175,7 +180,14 @@ export default class TokenHelper {
     const user = await this.getActiveUserById(decodedPayload.id);
     if (!user) throw new NotFoundError('User not found!');
 
+    const session = await SessionHelper.checkAndGetSession(
+      decodedPayload.session,
+    );
+
+    await SessionHelper.updateRotation(session._id.toString());
+
     const payload: TokenPayload = {
+      session: session._id.toString(),
       isAdmin: this.userType === allowedUserTypes.ADMIN,
       id: user._id,
       role: (user as any)?.roleId,
@@ -192,7 +204,10 @@ export default class TokenHelper {
     const user = await this.getActiveUserById(userId);
     if (!user) throw new NotFoundError('No active users found!');
 
+    const session = await SessionHelper.createSession(user._id);
+
     const payload: TokenPayload = {
+      session: session._id.toString(),
       isAdmin: this.userType === allowedUserTypes.ADMIN,
       id: user._id,
       role: (user as any).roleId,
