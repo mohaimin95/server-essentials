@@ -3,13 +3,14 @@ import { AllowedUserTypes } from '@@types';
 import jwt from 'jsonwebtoken';
 import { NotFoundError, UnauthorizedError } from '@@errors';
 import { IAdmin, IUser } from '@@interfaces';
+import { redisClient } from '@@utils';
 import UserHelper from './user.helper';
 import AdminHelper from './admin.helper';
 import SessionHelper from './session.helper';
 
 interface TokenOptions {
   refreshTokenKey: string;
-  accessTokenKey: string;
+  authTokenKey: string;
   expiry: string;
   refreshExpiry: string;
 }
@@ -17,7 +18,7 @@ interface TokenOptions {
 interface TokenPayload {
   session: string;
   isAdmin: boolean;
-  id: string;
+  _id: string;
   role?: string;
   phoneConfirmedAt?: string;
   emailConfirmedAt?: string;
@@ -58,7 +59,7 @@ export default class TokenHelper {
       }
 
       return {
-        accessTokenKey: JWT_ADMIN_KEY,
+        authTokenKey: JWT_ADMIN_KEY,
         refreshTokenKey: JWT_REFRESH_ADMIN_KEY,
         expiry: JWT_ADMIN_EXPIRY,
         refreshExpiry: JWT_ADMIN_REFRESH_EXPIRY,
@@ -75,7 +76,7 @@ export default class TokenHelper {
     }
 
     return {
-      accessTokenKey: JWT_KEY,
+      authTokenKey: JWT_KEY,
       refreshTokenKey: JWT_REFRESH_KEY,
       expiry: JWT_EXPIRY,
       refreshExpiry: JWT_REFRESH_EXPIRY,
@@ -123,7 +124,7 @@ export default class TokenHelper {
 
   async createTokens(
     id: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<{ authToken: string; refreshToken: string }> {
     const user: any = await this.getActiveUserById(id);
     if (!user) throw new NotFoundError('User not found!');
 
@@ -132,11 +133,11 @@ export default class TokenHelper {
     const payload: TokenPayload = {
       session: session._id.toString(),
       isAdmin: this.userType === allowedUserTypes.ADMIN,
-      id: (user as any)._id,
+      _id: (user as any)._id,
     };
 
     return {
-      accessToken: TokenHelper.createToken(
+      authToken: TokenHelper.createToken(
         {
           ...payload,
           role:
@@ -152,7 +153,7 @@ export default class TokenHelper {
               ? (user.phoneConfirmedAt as string)
               : undefined,
         },
-        this.options.accessTokenKey,
+        this.options.authTokenKey,
         this.options.expiry,
       ),
       refreshToken: TokenHelper.createToken(
@@ -163,12 +164,10 @@ export default class TokenHelper {
     };
   }
 
-  async verifyAccessToken(
-    accessToken: string,
-  ): Promise<TokenPayload> {
+  async verifyAccessToken(authToken: string): Promise<TokenPayload> {
     return TokenHelper.verifyToken(
-      accessToken,
-      this.options.accessTokenKey,
+      authToken,
+      this.options.authTokenKey,
     );
   }
 
@@ -177,7 +176,7 @@ export default class TokenHelper {
       refreshToken,
       this.options.refreshTokenKey,
     );
-    const user = await this.getActiveUserById(decodedPayload.id);
+    const user = await this.getActiveUserById(decodedPayload._id);
     if (!user) throw new NotFoundError('User not found!');
 
     const session = await SessionHelper.checkAndGetSession(
@@ -189,15 +188,22 @@ export default class TokenHelper {
     const payload: TokenPayload = {
       session: session._id.toString(),
       isAdmin: this.userType === allowedUserTypes.ADMIN,
-      id: user._id,
+      _id: user._id,
       role: (user as any)?.roleId,
     };
 
     return TokenHelper.createToken(
       payload,
-      this.options.accessTokenKey,
+      this.options.authTokenKey,
       this.options.expiry,
     );
+  }
+
+  private static async invalidateAccessToken(
+    sessionId: string,
+    exp: number,
+  ) {
+    return redisClient.setex(sessionId, Math.floor(exp), '1');
   }
 
   async createRefreshToken(userId: string): Promise<string> {
@@ -209,7 +215,7 @@ export default class TokenHelper {
     const payload: TokenPayload = {
       session: session._id.toString(),
       isAdmin: this.userType === allowedUserTypes.ADMIN,
-      id: user._id,
+      _id: user._id,
       role: (user as any).roleId,
     };
 
@@ -218,5 +224,25 @@ export default class TokenHelper {
       this.options.refreshTokenKey,
       this.options.refreshExpiry,
     );
+  }
+
+  static async logout(authToken: string) {
+    const decoded: any = jwt.decode(authToken);
+    if (!decoded) throw new UnauthorizedError('Invalid session.');
+    const remaining = Number(decoded?.exp) * 1000 - Date.now();
+    await TokenHelper.invalidateAccessToken(
+      decoded.session,
+      remaining / 1000,
+    );
+    await SessionHelper.removeSession(decoded.session);
+  }
+
+  static async validateAuthToken(authToken: string) {
+    const decoded: any = jwt.decode(authToken);
+    if (!decoded) throw new UnauthorizedError('Invalid session.');
+
+    if (await redisClient.get(decoded.session)) {
+      throw new UnauthorizedError('Invalid session.');
+    }
   }
 }

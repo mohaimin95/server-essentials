@@ -21,9 +21,5 @@ export const allowedUserTypes = {
 
 export const cookieRefs = {
   AUTH_TOKEN: 'authToken',
-  cookieExpiry: (): Date =>
-    new Date(
-      Date.now() +
-        (Number(process.env.JWT_EXPIRY) || 1) * 24 * 60 * 60 * 1000,
-    ),
+  REFRESH_TOKEN: 'refreshToken',
 };

@@ -5,4 +5,5 @@ export default interface IAuthRequest extends Request {
   user?: IDecryptedToken;
   userType?: string;
   isAdmin?: boolean;
+  tokenErr?: Error;
 }

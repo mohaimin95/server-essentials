@@ -38,4 +38,8 @@ export default class SessionHelper {
       { $inc: { rotations: 1 } },
     );
   }
+
+  static async removeSession(sessionId: string) {
+    return UserSession.deleteOne({ _id: ObjectId(sessionId) });
+  }
 }

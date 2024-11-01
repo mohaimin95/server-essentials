@@ -1,9 +1,9 @@
-import { cookieRefs } from 'src/core/utils/constants';
 import { getCookieParamForTokens } from 'src/core/utils/functions';
 import { IAuthRequest } from 'src/core/interfaces';
 import { UserService } from 'src/core/services';
 import { Controller, CookieParam } from 'src/core/types';
-import { Request, Response } from 'express';
+import { Request } from 'express';
+import { cookieRefs } from '@@constants';
 
 export default class UserController {
   static login: Controller = async (req: Request) => {
@@ -75,12 +75,12 @@ export default class UserController {
   static refreshAccessToken: Controller = async (
     req: IAuthRequest,
   ) => {
-    const accessToken = await UserService.refreshAccessToken(
-      req.signedCookies.refreshToken?.split('Bearer ')[1],
+    const authToken = await UserService.refreshAccessToken(
+      req.signedCookies[cookieRefs.REFRESH_TOKEN],
       req.isAdmin as boolean,
     );
     const cookies = getCookieParamForTokens({
-      accessToken,
+      authToken,
     }) as CookieParam[];
 
     return {
@@ -91,11 +91,10 @@ export default class UserController {
     };
   };
 
-  static logout: Controller = async (
-    _req: IAuthRequest,
-    res: Response,
-  ) => {
-    res.clearCookie(cookieRefs.AUTH_TOKEN);
+  static logout: Controller = async (req: IAuthRequest, res: any) => {
+    UserService.logout(req.signedCookies[cookieRefs.AUTH_TOKEN]);
+    res?.clearCookie(cookieRefs.AUTH_TOKEN);
+    res?.clearCookie(cookieRefs.REFRESH_TOKEN);
     return {
       response: {
         message: 'Successfully logged out.',

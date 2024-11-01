@@ -118,4 +118,8 @@ export default class UserService {
     );
     return tokenHelper.createAccessToken(refreshToken);
   }
+
+  static logout(authToken: string) {
+    TokenHelper.logout(authToken);
+  }
 }

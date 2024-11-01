@@ -1,4 +1,4 @@
-import { userTypes } from 'src/core/utils/constants';
+import { cookieRefs, userTypes } from 'src/core/utils/constants';
 import { Request } from 'express';
 import { mongo } from 'mongoose';
 
@@ -143,14 +143,14 @@ export const calculateExpiry = (expiry: string): Date => {
 };
 
 export const getCookieParamForTokens = (tokens: {
-  accessToken: string;
+  authToken: string;
   refreshToken?: string;
 }) => {
   const cookies = [];
-  if (tokens.accessToken) {
+  if (tokens.authToken) {
     cookies.push([
-      'authToken',
-      `Bearer ${tokens.accessToken}`,
+      cookieRefs.AUTH_TOKEN,
+      tokens.authToken,
       {
         expires: calculateExpiry(process.env.JWT_EXPIRY as string),
         httpOnly: true,
@@ -161,8 +161,8 @@ export const getCookieParamForTokens = (tokens: {
   }
   if (tokens.refreshToken) {
     cookies.push([
-      'refreshToken',
-      `Bearer ${tokens.refreshToken}`,
+      [cookieRefs.REFRESH_TOKEN],
+      tokens.refreshToken,
       {
         expires: calculateExpiry(
           process.env.JWT_REFRESH_EXPIRY as string,
